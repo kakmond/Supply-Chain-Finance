@@ -31,7 +31,6 @@ async function main() {
 
     // Main try/catch block
     try {
-
         // Specify userName for network access
         const userName = 'Admin@org1.example.com';
         // path below is variable
@@ -62,33 +61,36 @@ async function main() {
         console.log(' ');
         console.log('Calling queryHist to get the history of Transaction instance 00007');
         console.log('=======================================================================');
-        console.log(' ');
         // QUERY the history of a commercial paper providing it the Issuer/paper number combo below
         const queryResponse = await contract.submitTransaction('queryHist', 'MagnetoCorp', '00007');
         //let queryresult = CommercialPaper.fromBuffer(queryResponse);
 
-        // let file = await fs.writeFileSync('results.json', queryResponse, 'utf8');
-        console.log('the query HISTORY response is ' + JSON.stringify(queryResponse.toString(),null,'\t'));
-        //console.log('the query buffer response is ' + queryresult);
-        console.log(' ');
+        var decodedString = String.fromCharCode.apply(null, new Uint8Array(queryResponse));
+        var tempQueryRes = JSON.parse(decodedString);
+        tempQueryRes.forEach(element => {
+            console.log('============================================');
+            console.log('TxId: ' + element.TxId)
+            console.log('Paper Number: ' + element.Value.paperNumber)
+            console.log('Timestamp: ' + element.Timestamp)
+            console.log('Issuer: ' + element.Value.issuer)
+            console.log('Created By ' + element.Value.creator)
+            if(element.Value.currentState == 1){
+                console.log('Current State: ISSUED')
+            }
+            else if(element.Value.currentState == 2){
+                console.log('Current State: TRADING')
+                console.log('Buyer: ' + element.Value.buyer)
+            }
+            else if(element.Value.currentState == 3){
+                console.log('Current State: REDEEMED')
+                console.log('Buyer: ' + element.Value.buyer)
+            }
+            console.log('Issue Date Time: ' + element.Value.issueDateTime)
+            console.log('Price: ' + element.Value.faceValue)
+            console.log('Maturity Date Time: ' + element.Value.maturityDateTime)
+         });
 
-        console.log('Transaction complete.');
-        console.log(' ');
-
-        // query the OWNER of a commercial paper
-        console.log(' ');
-        console.log(' ');
-        console.log('Calling queryOwner to get all MagnetoCorp transactions');
-        console.log('==========================================================================');
-        console.log(' ');
-        console.log(' ');
-        const queryResponse2 = await contract.submitTransaction('queryOwner', 'MagnetoCorp');
-
-        console.log('the query by OWNER response is ' + queryResponse2.toString());
-        console.log(' ');
-        console.log('Transaction complete.');
-        console.log(' ');
-        console.log('End of Queries ============================================');
+        console.log('============================================ End of Queries ============================================');
         console.log(' ');
 
     } catch (error) {
