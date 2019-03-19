@@ -59,10 +59,10 @@ async function main() {
         const contract = await network.getContract('papercontract', 'org.papernet.commercialpaper');
 
         console.log(' ');
-        console.log('Calling queryHist to get the history of Transaction instance 00007');
+        console.log('Calling queryHist to get the history of Transaction instance 00008');
         console.log('=======================================================================');
-        // QUERY the history of a commercial paper providing it the Issuer/paper number combo below
-        const queryResponse = await contract.submitTransaction('queryHist', 'MagnetoCorp', '00007');
+        // QUERY the history of a transaction providing it the Issuer/paper number combo below
+        const queryResponse = await contract.submitTransaction('queryHist', 'MagnetoCorp', '00012');
         //let queryresult = CommercialPaper.fromBuffer(queryResponse);
 
         var decodedString = String.fromCharCode.apply(null, new Uint8Array(queryResponse));

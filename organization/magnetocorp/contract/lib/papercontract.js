@@ -94,15 +94,15 @@ class CommercialPaperContract extends Contract {
      * @param {String} newOwner new owner of paper
      * @param {Integer} price price paid for this paper
     */
-    async buy(ctx, issuer, paperNumber, currentOwner, newOwner) {
+    async buy(ctx, issuer, paperNumber, newOwner) {
 
         // Retrieve the current paper using key fields provided
         let paperKey = CommercialPaper.makeKey([issuer, paperNumber]);
         let paper = await ctx.paperList.getPaper(paperKey);
 
         // Validate current owner
-        if (paper.getOwner() !== currentOwner) {
-            throw new Error('Paper ' + issuer + paperNumber + ' is not owned by ' + currentOwner);
+        if (paper.getOwner() !== issuer) {
+            throw new Error('Paper ' + issuer + paperNumber + ' is not owned by ' + issuer);
         }
 
         // First buy moves state from ISSUED to TRADING

@@ -64,14 +64,14 @@ async function main() {
     // redeem commercial paper
     console.log('Submit redeem transaction.');
 
-    const redeemResponse = await contract.submitTransaction('redeem', 'MagnetoCorp', '00007', 'DigiBank', '2020-11-30');
+    const redeemResponse = await contract.submitTransaction('redeem', 'MagnetoCorp', '00012', 'DigiBank', '2020-11-30');
 
     // process response
     console.log('Process redeem transaction response.');
 
     let paper = CommercialPaper.fromBuffer(redeemResponse);
 
-    console.log(`${paper.issuer} Transaction : ${paper.paperNumber} successfully redeemed with ${paper.owner}`);
+    console.log(`${paper.issuer} Transaction : ${paper.paperNumber} successfully redeemed with DigiBank`);
     console.log('Transaction complete.');
 
   } catch (error) {
