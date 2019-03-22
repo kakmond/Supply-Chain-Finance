@@ -59,10 +59,10 @@ async function main() {
         const contract = await network.getContract('papercontract', 'org.papernet.commercialpaper');
 
         console.log(' ');
-        console.log('Calling queryHist to get the history of Transaction instance 00008');
+        console.log('Calling queryHist to get the history of Transaction instance');
         console.log('=======================================================================');
         // QUERY the history of a transaction providing it the Issuer/paper number combo below
-        const queryResponse = await contract.submitTransaction('queryHist', 'MagnetoCorp', '00012');
+        const queryResponse = await contract.submitTransaction('queryHist', 'MagnetoCorp', '00016');
         //let queryresult = CommercialPaper.fromBuffer(queryResponse);
 
         var decodedString = String.fromCharCode.apply(null, new Uint8Array(queryResponse));
@@ -78,10 +78,14 @@ async function main() {
                 console.log('Current State: ISSUED')
             }
             else if(element.Value.currentState == 2){
-                console.log('Current State: TRADING')
+                console.log('Current State: APPROVED')
                 console.log('Buyer: ' + element.Value.buyer)
             }
             else if(element.Value.currentState == 3){
+                console.log('Current State: TRADING')
+                console.log('Buyer: ' + element.Value.buyer)
+            }
+            else if(element.Value.currentState == 4){
                 console.log('Current State: REDEEMED')
                 console.log('Buyer: ' + element.Value.buyer)
             }

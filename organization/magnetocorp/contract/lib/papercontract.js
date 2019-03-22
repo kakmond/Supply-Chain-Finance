@@ -13,7 +13,7 @@ const PaperList = require('./paperlist.js');
 const QueryUtils = require('./query.js');
 
 /**
- * A custom context provides easy access to list of all commercial papers
+ * A custom context provides easy access to list of all papers
  */
 class CommercialPaperContext extends Context {
 
@@ -26,7 +26,7 @@ class CommercialPaperContext extends Context {
 }
 
 /**
- * Define commercial paper smart contract by extending Fabric Contract class
+ * Define invoice paper smart contract by extending Fabric Contract class
  *
  */
 class CommercialPaperContract extends Contract {
@@ -54,7 +54,7 @@ class CommercialPaperContract extends Contract {
     }
 
     /**
-     * Issue commercial paper
+     * Issue invoice paper
      *
      * @param {Context} ctx the transaction context
      * @param {String} issuer commercial paper issuer
@@ -62,8 +62,7 @@ class CommercialPaperContract extends Contract {
      * @param {String} issueDateTime paper issue date
      * @param {Integer} faceValue face value of paper
     */
-    async issue(ctx, issuer, paperNumber, issueDateTime, faceValue) {
-        let maturityDateTime = (parseInt(issueDateTime.split('-')[0]) + 1) + "-" + issueDateTime.split('-')[1] + "-" + issueDateTime.split('-')[2]
+    async issue(ctx, issuer, paperNumber, issueDateTime, maturityDateTime, faceValue) {
         // create an instance of the paper
         let paper = CommercialPaper.createInstance(issuer, paperNumber, issueDateTime, maturityDateTime, faceValue);
 
@@ -71,7 +70,7 @@ class CommercialPaperContract extends Contract {
         paper.setIssued();
 
         // Newly issued paper is owned by the issuer
-        paper.setOwner(issuer);
+        paper.setIssuer(issuer);
 
         // Add the invoking CN, to the Paper state for reporting purposes later on
         let invokingId = await this.getInvoker(ctx);
@@ -85,43 +84,70 @@ class CommercialPaperContract extends Contract {
     }
 
     /**
-     * Buy commercial paper
+     * approve invoice
+     *
+     * @param {Context} ctx the transaction context
+     * @param {String} issuer paper issuer
+     * @param {Integer} paperNumber paper number for this issuer
+     * @param {String} buyer trader of paper
+    */
+    async approve(ctx, issuer, paperNumber, buyer) {
+        // Retrieve the current paper using key fields provided
+        let paperKey = CommercialPaper.makeKey([issuer, paperNumber]);
+        let paper = await ctx.paperList.getPaper(paperKey);
+    
+        // Validate current owner
+        if (paper.getIssuer() !== issuer) {
+            throw new Error('Paper ' + issuer + paperNumber + ' is not owned by ' + issuer);
+        }
+    
+        // First buy moves state from ISSUED to APPROVED
+        if (paper.isIssued()) {
+            paper.setApproved();
+        }
+    
+        // Check paper is APPROVED
+        if (paper.isApproved()) {
+            paper.setBuyer(buyer);
+        } else {
+            throw new Error('Paper ' + issuer + paperNumber + ' is not approved. Current state = ' + paper.getCurrentState());
+        }
+    
+        // Update the paper
+        await ctx.paperList.updatePaper(paper);
+        return paper.toBuffer();
+    }
+
+    /**
+     * Buy invoice
      *
      * @param {Context} ctx the transaction context
      * @param {String} issuer commercial paper issuer
      * @param {Integer} paperNumber paper number for this issuer
-     * @param {String} currentOwner current owner of paper
-     * @param {String} newOwner new owner of paper
-     * @param {Integer} price price paid for this paper
+     * @param {String} trader trader of paper
     */
-    async buy(ctx, issuer, paperNumber, newOwner) {
+    async trade(ctx, issuer, paperNumber, trader) {
 
         // Retrieve the current paper using key fields provided
         let paperKey = CommercialPaper.makeKey([issuer, paperNumber]);
         let paper = await ctx.paperList.getPaper(paperKey);
 
         // Validate current owner
-        if (paper.getOwner() !== issuer) {
+        if (paper.getIssuer() !== issuer) {
             throw new Error('Paper ' + issuer + paperNumber + ' is not owned by ' + issuer);
         }
 
-        // First buy moves state from ISSUED to TRADING
-        if (paper.isIssued()) {
+        // First buy moves state from APPROVE to TRADING
+        if (paper.isApproved()) {
             paper.setTrading();
         }
 
-        // Check paper is not already REDEEMED
+        // Check paper is TRADING
         if (paper.isTrading()) {
-            // paper.setOwner(newOwner);
-            // paper.setPrice(price);
-            paper.setBuyer(newOwner);
+            paper.setTrader(trader)
         } else {
             throw new Error('Paper ' + issuer + paperNumber + ' is not trading. Current state = ' + paper.getCurrentState());
         }
-
-        // Add the invoking CN, to the Paper state for reporting purposes later on
-        let invokingId = await this.getInvoker(ctx);
-        paper.setCreator(invokingId);
 
         // Update the paper
         await ctx.paperList.updatePaper(paper);
@@ -129,10 +155,10 @@ class CommercialPaperContract extends Contract {
     }
 
     /**
-     * Redeem commercial paper
+     * Redeem invoice
      *
      * @param {Context} ctx the transaction context
-     * @param {String} issuer commercial paper issuer
+     * @param {String} issuer invoice issuer
      * @param {Integer} paperNumber paper number for this issuer
      * @param {String} redeemingOwner redeeming owner of paper
      * @param {String} redeemDateTime time paper was redeemed
@@ -150,14 +176,10 @@ class CommercialPaperContract extends Contract {
 
         // Verify that the redeemer owns the commercial paper before redeeming it
         if (paper.getBuyer() === redeemingOwner) {
-            // paper.setOwner(paper.getIssuer());
             paper.setRedeemed();
         } else {
             throw new Error('Redeeming owner does not own paper' + issuer + paperNumber);
         }
-        // Add the invoking CN, to the Paper state for reporting purposes later on
-        let invokingId = await this.getInvoker(ctx);
-        paper.setCreator(invokingId);
 
         await ctx.paperList.updatePaper(paper);
         return paper.toBuffer();

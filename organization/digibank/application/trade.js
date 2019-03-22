@@ -62,17 +62,17 @@ async function main() {
 
     const contract = await network.getContract('papercontract', 'org.papernet.commercialpaper');
 
-    // buy commercial paper
-    console.log('Submit buy transaction.');
+    // trade commercial paper
+    console.log('Submit trade transaction.');
 
-    const buyResponse = await contract.submitTransaction('buy', 'MagnetoCorp', '00012', 'DigiBank');
+    const buyResponse = await contract.submitTransaction('trade', 'MagnetoCorp', '00016', 'Trader');
 
     // process response
-    console.log('Process buy transaction response.');
+    console.log('Process trade transaction response.');
 
     let paper = CommercialPaper.fromBuffer(buyResponse);
 
-    console.log(`${paper.issuer} Transaction : ${paper.paperNumber} successfully purchased by DigiBank`);
+    console.log(`${paper.issuer} Transaction : ${paper.paperNumber} successfully traded by Trader`);
     console.log('Transaction complete.');
 
   } catch (error) {
@@ -90,11 +90,11 @@ async function main() {
 }
 main().then(() => {
 
-  console.log('Buy program complete.');
+  console.log('Trade program complete.');
 
 }).catch((e) => {
 
-  console.log('Buy program exception.');
+  console.log('Trade program exception.');
   console.log(e);
   console.log(e.stack);
   process.exit(-1);

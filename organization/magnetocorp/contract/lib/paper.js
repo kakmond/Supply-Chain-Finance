@@ -10,8 +10,9 @@ const State = require('./../ledger-api/state.js');
 // Enumerate commercial paper state values
 const cpState = {
     ISSUED: 1,
-    TRADING: 2,
-    REDEEMED: 3
+    APPROVED: 2,
+    TRADING: 3,
+    REDEEMED: 4
 };
 
 /**
@@ -23,6 +24,10 @@ class CommercialPaper extends State {
     constructor(obj) {
         super(CommercialPaper.getClass(), [obj.issuer, obj.paperNumber]);
         Object.assign(this, obj);
+    }
+
+    getCurrentState(){
+        return this.currentState
     }
 
     setCreator(creator) {
@@ -46,12 +51,12 @@ class CommercialPaper extends State {
         this.issuer = newIssuer;
     }
 
-    getOwner() {
-        return this.owner;
+    getTrader(){
+        return this.trader;
     }
 
-    setOwner(newOwner) {
-        this.owner = newOwner;
+    setTrader(trader){
+        this.trader = trader;
     }
 
     /**
@@ -59,6 +64,10 @@ class CommercialPaper extends State {
      */
     setIssued() {
         this.currentState = cpState.ISSUED;
+    }
+
+    setApproved(){
+        this.currentState = cpState.APPROVED;
     }
 
     setTrading() {
@@ -79,6 +88,10 @@ class CommercialPaper extends State {
 
     isRedeemed() {
         return this.currentState === cpState.REDEEMED;
+    }
+
+    isApproved(){
+        return this.currentState === cpState.APPROVED;
     }
 
     static fromBuffer(buffer) {

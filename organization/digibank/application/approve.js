@@ -44,6 +44,7 @@ async function main() {
       identity: userName,
       wallet: wallet,
       discovery: { enabled:false, asLocalhost: true }
+
     };
 
     // Connect to gateway using application specified parameters
@@ -61,17 +62,17 @@ async function main() {
 
     const contract = await network.getContract('papercontract', 'org.papernet.commercialpaper');
 
-    // redeem commercial paper
-    console.log('Submit redeem transaction.');
+    // approve commercial paper
+    console.log('Submit approve transaction.');
 
-    const redeemResponse = await contract.submitTransaction('redeem', 'MagnetoCorp', '00016', 'DigiBank', '2020-11-30');
+    const approveResponse = await contract.submitTransaction('approve', 'MagnetoCorp', '00016', 'DigiBank');
 
     // process response
-    console.log('Process redeem transaction response.');
+    console.log('Process approve transaction response.');
 
-    let paper = CommercialPaper.fromBuffer(redeemResponse);
+    let paper = CommercialPaper.fromBuffer(approveResponse);
 
-    console.log(`${paper.issuer} Transaction : ${paper.paperNumber} successfully redeemed with DigiBank`);
+    console.log(`${paper.issuer} Transaction : ${paper.paperNumber} successfully approved by DigiBank`);
     console.log('Transaction complete.');
 
   } catch (error) {
@@ -89,11 +90,11 @@ async function main() {
 }
 main().then(() => {
 
-  console.log('Redeem program complete.');
+  console.log('Approve program complete.');
 
 }).catch((e) => {
 
-  console.log('Redeem program exception.');
+  console.log('Approve program exception.');
   console.log(e);
   console.log(e.stack);
   process.exit(-1);

@@ -70,7 +70,7 @@ class QueryUtils  {
         let queryString = {};
         queryString.selector = {};
         //  queryString.selector.docType = 'indexOwnerDoc';
-        queryString.selector.owner = owner;
+        queryString.selector.issuer = owner;
         console.log(' query string is ', queryString);
         // '{"selector":{"owner":"MagnetoCorp"}}'
         let method = self.getQueryResultForQueryString;

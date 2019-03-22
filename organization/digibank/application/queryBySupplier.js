@@ -70,24 +70,41 @@ async function main() {
         var decodedString = String.fromCharCode.apply(null, new Uint8Array(queryResponse2));
         var tempQueryRes2 = JSON.parse(decodedString);
         tempQueryRes2.forEach(element => {
+            var paperNumber = element.Record.paperNumber
+            var issuer = element.Record.issuer
+            var createdBy = element.Record.creator
+            var state = (element.Record.currentState)
+            var issueDateTime = element.Record.issueDateTime
+            var price = element.Record.faceValue
+            var maturityDateTime = element.Record.maturityDateTime
+
             console.log('============================================');
-            console.log('Paper Number: ' + element.Record.paperNumber)
-            console.log('Issuer: ' + element.Record.issuer)
-            console.log('Created By ' + element.Record.creator)
-            if(element.Record.currentState == 1){
+            console.log('Paper Number: ' + paperNumber)
+            console.log('Issuer: ' + issuer)
+            console.log('Created By ' + createdBy)
+
+            if(state == 1){
                 console.log('Current State: ISSUED')
             }
-            else if(element.Record.currentState == 2){
+            else if(state == 2){
+                console.log('Current State: APPROVED')
+                var buyer = element.Record.buyer
+                console.log('Buyer: ' + buyer)
+            }
+            else if(state == 3){
                 console.log('Current State: TRADING')
-                console.log('Buyer: ' + element.Record.buyer)
+                var buyer = element.Record.buyer
+                console.log('Buyer: ' + buyer)
             }
-            else if(element.Record.currentState == 3){
+            else if(state == 4){
                 console.log('Current State: REDEEMED')
-                console.log('Buyer: ' + element.Record.buyer)
+                var buyer = element.Record.buyer
+                console.log('Buyer: ' + buyer)
             }
-            console.log('Issue Date Time: ' + element.Record.issueDateTime)
-            console.log('Price: ' + element.Record.faceValue)
-            console.log('Maturity Date Time: ' + element.Record.maturityDateTime)
+            console.log('Issue Date Time: ' + issueDateTime)
+            console.log('Price: ' + price)
+            console.log('Maturity Date Time: ' + maturityDateTime)
+
          });
 
 
